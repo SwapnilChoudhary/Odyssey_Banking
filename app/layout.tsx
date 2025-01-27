@@ -14,8 +14,8 @@ const ibmPlexSerif = IBM_Plex_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Odyssey",
-  description: "Odyssey is a new banking application for modern transactions and savings including different web3 assets for everyone.",
+  title: "Odyssey Bank",
+  description: "Odyssey Bank is a new banking application for modern transactions and savings including different web3 assets for everyone.",
   icons:{
     icon: '/icons/logo.svg'
   }
