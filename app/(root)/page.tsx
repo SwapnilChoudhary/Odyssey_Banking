@@ -7,6 +7,10 @@ import React from 'react'
 const Home = async () => {
     const loggedIn = await getLoggedInUser();
 
+    function mockdata(arg0: number): Bank & Account {
+        throw new Error('Function not implemented.');
+    }
+
     return (
         <section className="home">
             <div className="home-content">
@@ -14,7 +18,7 @@ const Home = async () => {
                     <HeaderBox 
                         type="greeting"
                         title="Welcome"
-                        user={loggedIn?.name || 'Guest'}
+                        user={loggedIn?.name || 'Guest' }
                         subtext="Access and manage your account and transactions efficiently."
                     /> 
 
@@ -31,7 +35,7 @@ const Home = async () => {
             <RightSideBar 
                 user={loggedIn}
                 transactions={[]}
-                banks={[{ currentBalance: 142.34 }, { currentBalance: 657.37 }]}
+                banks={[mockdata(142.34), mockdata(657.37)]}
             />
         </section>
     )
