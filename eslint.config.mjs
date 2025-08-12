@@ -10,14 +10,13 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // Extend Next.js and TypeScript config
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 
   // Custom overrides
   {
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
-      'react/no-unescaped-entities': 'off',
-      '@next/next/no-page-custom-font': 'off',
       "@typescript-eslint/no-explicit-any": "warn", // was "error"
       "@typescript-eslint/no-unused-vars": [
         "warn",
