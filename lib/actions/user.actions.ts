@@ -1,6 +1,6 @@
 'use server';
 
-import { ID } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { createAdminClient, createSessionClient } from "../appwrite";
 import { cookies } from "next/headers";
 import { encryptId, extractCustomerIdFromUrl, parseStringify } from "../utils";
@@ -9,7 +9,6 @@ import { CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreateRequestPr
 import { plaidClient } from "@/lib/plaid";
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from "./dwolla.actions";
-import { string } from "zod";
 
 const {
     APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -17,16 +16,40 @@ const {
     APPWRITE_BANK_COLLECTION_ID: BANK_COLLECTION_ID,
 } = process.env;
 
+export const getUserInfo = async ({ userId }: getUserInfoProps) => {
+  try {
+    const { database } = await createAdminClient();
+
+    const user = await database.listDocuments(
+      DATABASE_ID!,
+      USER_COLLECTION_ID!,
+      [Query.equal('userId', [userId])]
+    )
+
+    return parseStringify(user.documents[0]);
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 export const signIn = async ({ email, password }: signInProps) => {
-    try {
-        const { account } = await createAdminClient();
+  try {
+    const { account } = await createAdminClient();
+    const session = await account.createEmailPasswordSession(email, password);
 
-        const response = await account.createEmailPasswordSession(email, password);
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
 
-        return parseStringify(response);
-    } catch (error) {
-        console.error('Error', error);
-    }
+    const user = await getUserInfo({ userId: session.userId }) 
+
+    return parseStringify(user);
+  } catch (error) {
+    console.error('Error', error);
+  }
 }
 
 export const signUp = async ({password, ...userData}: SignUpParams) => {
@@ -113,12 +136,13 @@ export const createLinkToken = async (user: User) => {
             user: {
                 client_user_id: user.$id
             },
-            client_name: user.name,
+            client_name: `${user.firstName} ${user.lastName}`,
             product: ['auth'] as Products[],
             language: 'en',
             country_codes: ['US'] as CountryCode[],
         }
 
+        console.log("Token Params:", tokenParams);
         const response = await plaidClient.linkTokenCreate(tokenParams);
 
         return parseStringify({ linkToken: response.data.link_token })

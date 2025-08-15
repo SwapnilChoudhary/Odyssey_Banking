@@ -9,19 +9,10 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import {
     Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import CustomInput from "./CustomInput";
 import { authFormSchema } from "@/lib/utils";
-import { Loader2, User } from "lucide-react";
-import SignUp from "@/app/(auth)/sign-up/page";
-import SignIn from "@/app/(auth)/sign-in/page";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/lib/actions/user.actions";
 import PlaidLink from "./PlaidLink";
@@ -36,7 +27,7 @@ const AuthForm = ({ type }: { type: string }) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: '',
+            email: "",
             password: ''
         },
     })
@@ -57,7 +48,7 @@ const AuthForm = ({ type }: { type: string }) => {
                 state: data.state!,
                 postalCode: data.postalCode!,
                 dateOfBirth: data.dateOfBirth!,
-                adhaarNumber: data.adhaarNumber!,
+                ssn: data.ssn!,
                 email: data.email,
                 password: data.password,  
             }
@@ -140,7 +131,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
                                     <div className="flex gap-4">
                                     <CustomInput control={form.control} name='dateOfBirth' label='Date of Birth' placeholder='YYYY-MM-DD'  />
-                                    <CustomInput control={form.control} name='adhaarNumber' label='Adhaar Number' placeholder='Example: 8888-4444-5555'  />
+                                    <CustomInput control={form.control} name='ssn' label='SSN' placeholder='Example: 1234'  />
                                     </div>
                                 </>
                             )}
