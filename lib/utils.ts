@@ -206,6 +206,6 @@ export const authFormSchema = (type: string) => z.object({
   dateOfBirth: type === 'sign-in' ? z.string().optional() : z.string().min(3),
   ssn: type === 'sign-in' ? z.string().optional() : z.string().min(4).max(12),
   // both
-  email: z.email().min(8).max(35),
+  email: z.string().email().min(8).max(35),
   password: z.string().min(8).max(35)
 })

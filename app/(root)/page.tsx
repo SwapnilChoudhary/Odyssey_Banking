@@ -1,71 +1,62 @@
-export const dynamic = "force-dynamic";
-
 import HeaderBox from '@/components/HeaderBox'
-import RightSideBar from '@/components/RightSideBar';
+import RecentTransactions from '@/components/RecentTransactions';
+import RightSidebar from '@/components/RightSideBar';
 import TotalBalanceBox from '@/components/TotalBalanceBox';
+import { getAccount, getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
-import React from 'react'
 
-const Home = async () => {
-    const loggedIn = await getLoggedInUser();
+const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
+  const currentPage = Number(page as string) || 1;
+  const loggedIn = await getLoggedInUser();
+  const accounts = await getAccounts({ 
+    userId: loggedIn.$id 
+  })
 
-    function mockdata(balance: number): Bank & Account {
-  return {
-    // --- Bank fields ---
-    $id: "mock_bank_id",
-    accountId: "mock_account_id",
-    bankId: "mock_bank_id",
-    accessToken: "mock_access_token",
-    fundingSourceUrl: "https://example.com/funding",
-    userId: "mock_user_id",
-    sharableId: "mock_sharable_id", // Bank also has this field
-    currentBalance: balance, // Bank's currentBalance (same as Account's)
+  if(!accounts) return;
+  
+  const accountsData = accounts?.data;
+  const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
 
-    // --- Account fields ---
-    id: "mock_account_id",
-    availableBalance: balance - 100, // Example difference
-    officialName: "Mock Official Bank Account",
-    mask: "1234",
-    institutionId: "mock_institution_id",
-    name: "Mock Checking Account",
-    type: "depository",
-    subtype: "checking",
-    appwriteItemId: "mock_appwrite_item_id",
-    // sharableId already filled above (shared property)
-  };
-}
+  const account = await getAccount({ appwriteItemId })
 
+  console.log({
+    accountsData,
+    account
+  })
 
+  return (
+    <section className="home">
+      <div className="home-content">
+        <header className="home-header">
+          <HeaderBox 
+            type="greeting"
+            title="Welcome"
+            user={loggedIn?.firstName || 'Guest'}
+            subtext="Access and manage your account and transactions efficiently."
+          />
 
-    return (
-        <section className="home">
-            <div className="home-content">
-                <header className="home-header">
-                    <HeaderBox 
-                        type="greeting"
-                        title="Welcome"
-                        user={loggedIn?.name || 'Guest' }
-                        subtext="Access and manage your account and transactions efficiently."
-                    /> 
+          <TotalBalanceBox 
+            accounts={accountsData}
+            totalBanks={accounts?.totalBanks}
+            totalCurrentBalance={accounts?.totalCurrentBalance}
+          />
+        </header>
 
-                    <TotalBalanceBox
-                        accounts={[]}
-                        totalBanks={1}
-                        totalCurrentBalance={1250.35}
-                    />
-                </header>
+        <RecentTransactions 
+          accounts={accountsData}
+          transactions={account?.transactions}
+          appwriteItemId={appwriteItemId}
+          page={currentPage}
+        />
+      </div>
 
-                RECENT TRANSACTIONS
-            </div>
-
-            <RightSideBar 
-                user={loggedIn}
-                transactions={[]}
-                banks={[mockdata(142.34), mockdata(657.37)]}
-
-            />
-        </section>
-    )
+      <RightSidebar 
+        user={loggedIn}
+        transactions={account?.transactions}
+        banks={accountsData?.slice(0, 2)}
+      />
+    </section>
+  )
 }
 
 export default Home
